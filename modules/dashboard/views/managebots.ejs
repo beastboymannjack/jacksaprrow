@@ -1,0 +1,488 @@
+<%- include('header'); -%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/sweetalert.css">
+    <title>Bot Hosting | Manage Bots</title>
+</head>
+
+<style>
+    .bot-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 16px;
+    }
+    .bot-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+        transition: all 0.15s ease;
+    }
+    .bot-card:hover {
+        border-color: var(--border-hover);
+    }
+    .bot-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+    .bot-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+    }
+    .bot-type {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+    .bot-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+        background: var(--bg-input);
+        border-radius: 8px;
+        margin-bottom: 16px;
+    }
+    .bot-info-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+    }
+    .bot-info-label {
+        color: var(--text-muted);
+    }
+    .bot-info-value {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    .bot-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .filter-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .filter-bar .search-input {
+        flex: 1;
+        min-width: 200px;
+    }
+    .filter-btn {
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid var(--border-color);
+        background: transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .filter-btn:hover, .filter-btn.active {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+    @media (max-width: 640px) {
+        .bot-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h1 class="section-title" style="margin: 0;"><i class="fa fa-robot" style="margin-right: 10px;"></i>Manage Bots</h1>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px;">Monitor and control your deployed bots</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="location.reload()" class="btn btn-outline btn-sm">
+                <i class="fa fa-sync"></i> Refresh
+            </button>
+            <a href="/createbot" class="btn btn-primary btn-sm">
+                <i class="fa fa-plus"></i> New Bot
+            </a>
+        </div>
+    </div>
+
+    <% if(typeof botStats !== 'undefined') { %>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px;">
+        <div class="card stat-card" style="padding: 16px;">
+            <div class="stat-value" style="font-size: 1.5rem; color: var(--primary-light);"><%= botStats.total %></div>
+            <div class="stat-label">Total</div>
+        </div>
+        <div class="card stat-card" style="padding: 16px;">
+            <div class="stat-value" style="font-size: 1.5rem; color: var(--accent);"><%= botStats.running %></div>
+            <div class="stat-label">Running</div>
+        </div>
+        <div class="card stat-card" style="padding: 16px;">
+            <div class="stat-value" style="font-size: 1.5rem; color: var(--danger);"><%= botStats.stopped %></div>
+            <div class="stat-label">Stopped</div>
+        </div>
+        <% if(botStats.system) { %>
+        <div class="card stat-card" style="padding: 16px;">
+            <div class="stat-value" style="font-size: 1.5rem; color: var(--warning);"><%= botStats.system.memoryUsedMB %> MB</div>
+            <div class="stat-label">Memory</div>
+        </div>
+        <% } %>
+    </div>
+    <% } %>
+
+    <% if(hostedBots.length > 0) { %>
+    <div class="filter-bar">
+        <div class="search-input" style="flex: 1; min-width: 200px;">
+            <i class="fa fa-search"></i>
+            <input type="text" class="form-control" id="searchInput" placeholder="Search bots..." style="padding-left: 40px;" oninput="filterBots()">
+        </div>
+        <button class="filter-btn active" onclick="filterByStatus('all', this)">All</button>
+        <button class="filter-btn" onclick="filterByStatus('running', this)">Running</button>
+        <button class="filter-btn" onclick="filterByStatus('stopped', this)">Stopped</button>
+    </div>
+    <% } %>
+
+    <% if(typeof remoteConfigured !== 'undefined' && remoteConfigured) { %>
+    <div id="remoteStatusBar" class="card" style="padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+        <i class="fa fa-server" style="color: var(--text-muted);"></i>
+        <span>Secondary Replit: </span>
+        <span id="remoteStatus" class="badge badge-warning">Checking...</span>
+        <button onclick="loadRemoteBots()" class="btn btn-outline btn-sm" style="margin-left: auto;">
+            <i class="fa fa-sync"></i> Refresh Remote
+        </button>
+    </div>
+    <% } %>
+
+    <% if(hostedBots.length === 0) { %>
+        <div class="card empty-state" id="localEmptyState">
+            <i class="fa fa-robot empty-state-icon"></i>
+            <p class="empty-state-text">No local bots deployed yet</p>
+            <a href="/createbot" class="btn btn-primary"><i class="fa fa-plus"></i> Deploy Your First Bot</a>
+        </div>
+    <% } else { %>
+        <div class="bot-grid" id="botGrid">
+            <% hostedBots.forEach(function(bot) { %>
+                <div class="bot-card" data-name="<%= bot.name.toLowerCase() %>" data-status="<%= bot.running ? 'running' : 'stopped' %>">
+                    <div class="bot-header">
+                        <div>
+                            <div class="bot-name"><%= bot.name %></div>
+                            <div class="bot-type"><%= bot.type %></div>
+                        </div>
+                        <span class="badge <%= bot.running ? 'badge-success' : 'badge-danger' %>">
+                            <i class="fa fa-circle" style="font-size: 0.5rem; margin-right: 4px;"></i>
+                            <%= bot.running ? 'Running' : 'Stopped' %>
+                        </span>
+                    </div>
+                    
+                    <div class="bot-info">
+                        <% if(bot.pid && bot.running) { %>
+                        <div class="bot-info-row">
+                            <span class="bot-info-label">Process ID</span>
+                            <span class="bot-info-value"><%= bot.pid %></span>
+                        </div>
+                        <% } %>
+                        <% if(bot.uptime && bot.running) { %>
+                        <div class="bot-info-row">
+                            <span class="bot-info-label">Uptime</span>
+                            <span class="bot-info-value">
+                                <% 
+                                    const hours = Math.floor(bot.uptime / 3600000);
+                                    const minutes = Math.floor((bot.uptime % 3600000) / 60000);
+                                %>
+                                <%= hours > 0 ? hours + 'h ' : '' %><%= minutes %>m
+                            </span>
+                        </div>
+                        <% } %>
+                        <% if(bot.memory && bot.running) { %>
+                        <div class="bot-info-row">
+                            <span class="bot-info-label">Memory</span>
+                            <span class="bot-info-value"><%= bot.memory %> MB</span>
+                        </div>
+                        <% } %>
+                        <% if(bot.restarts > 0) { %>
+                        <div class="bot-info-row">
+                            <span class="bot-info-label">Restarts</span>
+                            <span class="bot-info-value"><%= bot.restarts %></span>
+                        </div>
+                        <% } %>
+                        <% if(bot.startedAt && bot.running) { %>
+                        <div class="bot-info-row">
+                            <span class="bot-info-label">Started</span>
+                            <span class="bot-info-value"><%= new Date(bot.startedAt).toLocaleString() %></span>
+                        </div>
+                        <% } %>
+                        <% if(!bot.running && !bot.pid && !bot.uptime) { %>
+                        <div class="bot-info-row">
+                            <span class="bot-info-label">Status</span>
+                            <span class="bot-info-value">Not running</span>
+                        </div>
+                        <% } %>
+                    </div>
+                    
+                    <div class="bot-actions">
+                        <% if(!bot.running) { %>
+                            <button onclick="startBot('<%= bot.path %>')" class="btn btn-success btn-sm">
+                                <i class="fa fa-play"></i> Start
+                            </button>
+                        <% } else { %>
+                            <button onclick="stopBot('<%= bot.path %>')" class="btn btn-danger btn-sm">
+                                <i class="fa fa-stop"></i> Stop
+                            </button>
+                        <% } %>
+                        <button onclick="restartBot('<%= bot.path %>')" class="btn btn-warning btn-sm">
+                            <i class="fa fa-redo"></i> Restart
+                        </button>
+                        <button onclick="viewLogs('<%= bot.name %>')" class="btn btn-outline btn-sm">
+                            <i class="fa fa-file-alt"></i> Logs
+                        </button>
+                        <button onclick="deleteBot('<%= bot.path %>', '<%= bot.name %>')" class="btn btn-sm" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2);">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } %>
+
+    <% if(typeof remoteConfigured !== 'undefined' && remoteConfigured) { %>
+    <h2 class="section-title" style="margin-top: 32px; margin-bottom: 16px;">
+        <i class="fa fa-cloud" style="margin-right: 10px;"></i>Remote Bots (Secondary Replit)
+    </h2>
+    <div class="bot-grid" id="remoteBotGrid">
+        <div class="card" style="padding: 20px; text-align: center; color: var(--text-muted);">
+            <i class="fa fa-spinner fa-spin"></i> Loading remote bots...
+        </div>
+    </div>
+    <% } %>
+</div>
+
+</main>
+
+<script>
+    let currentFilter = 'all';
+    const remoteConfigured = <%= typeof remoteConfigured !== 'undefined' && remoteConfigured ? 'true' : 'false' %>;
+
+    function filterBots() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.bot-card');
+        
+        cards.forEach(card => {
+            const name = card.dataset.name;
+            const status = card.dataset.status;
+            const matchesSearch = name.includes(search);
+            const matchesFilter = currentFilter === 'all' || status === currentFilter;
+            card.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+        });
+    }
+
+    function filterByStatus(status, btn) {
+        currentFilter = status;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterBots();
+    }
+
+    function apiCall(url, data, successMsg) {
+        Swal.fire({ title: 'Please wait...', showConfirmButton: false, allowOutsideClick: false, background: '#13132b', color: '#f1f5f9' });
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            credentials: 'include'
+        })
+        .then(res => {
+            if (res.status === 401) {
+                Swal.fire({ icon: 'warning', title: 'Session Expired', text: 'Please log in again.', background: '#13132b', color: '#f1f5f9' })
+                .then(() => window.location.href = '/login');
+                return null;
+            }
+            return res.json();
+        })
+        .then(result => {
+            if (!result) return;
+            if (result.success) {
+                Swal.fire({ icon: 'success', title: successMsg, timer: 1500, showConfirmButton: false, background: '#13132b', color: '#f1f5f9' })
+                .then(() => location.reload());
+            } else {
+                if (result.error && result.error.includes('Not authenticated')) {
+                    Swal.fire({ icon: 'warning', title: 'Session Expired', text: 'Please log in again.', background: '#13132b', color: '#f1f5f9' })
+                    .then(() => window.location.href = '/login');
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: result.error, background: '#13132b', color: '#f1f5f9' });
+                }
+            }
+        })
+        .catch(err => {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Request failed: ' + err.message, background: '#13132b', color: '#f1f5f9' });
+        });
+    }
+
+    function startBot(path) { apiCall('/api/bot/start', { path }, 'Bot Started!'); }
+    function restartBot(path) { apiCall('/api/bot/restart', { path }, 'Bot Restarted!'); }
+    
+    function stopBot(path) {
+        Swal.fire({
+            title: 'Stop this bot?',
+            text: 'The bot will go offline.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Stop',
+            background: '#13132b',
+            color: '#f1f5f9'
+        }).then((r) => { if (r.isConfirmed) apiCall('/api/bot/stop', { path }, 'Bot Stopped!'); });
+    }
+
+    function deleteBot(path, name) {
+        Swal.fire({
+            title: 'Delete ' + name + '?',
+            text: 'This action cannot be undone. All bot files will be removed.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Delete',
+            background: '#13132b',
+            color: '#f1f5f9'
+        }).then((r) => { if (r.isConfirmed) apiCall('/api/bot/delete', { path }, 'Bot Deleted!'); });
+    }
+
+    function viewLogs(botName) {
+        window.location.href = '/logs?bot=' + encodeURIComponent(botName);
+    }
+
+    function remoteApiCall(url, method, successMsg) {
+        Swal.fire({ title: 'Please wait...', showConfirmButton: false, allowOutsideClick: false, background: '#13132b', color: '#f1f5f9' });
+        fetch(url, {
+            method: method || 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                Swal.fire({ icon: 'success', title: successMsg, timer: 1500, showConfirmButton: false, background: '#13132b', color: '#f1f5f9' })
+                .then(() => loadRemoteBots());
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: result.error, background: '#13132b', color: '#f1f5f9' });
+            }
+        })
+        .catch(err => {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Request failed: ' + err.message, background: '#13132b', color: '#f1f5f9' });
+        });
+    }
+
+    function startRemoteBot(botKey) { remoteApiCall('/api/remote/bots/' + encodeURIComponent(botKey) + '/start', 'POST', 'Remote Bot Started!'); }
+    function stopRemoteBot(botKey) {
+        Swal.fire({
+            title: 'Stop remote bot?',
+            text: 'The bot will go offline.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Stop',
+            background: '#13132b',
+            color: '#f1f5f9'
+        }).then((r) => { if (r.isConfirmed) remoteApiCall('/api/remote/bots/' + encodeURIComponent(botKey) + '/stop', 'POST', 'Remote Bot Stopped!'); });
+    }
+    function restartRemoteBot(botKey) { remoteApiCall('/api/remote/bots/' + encodeURIComponent(botKey) + '/restart', 'POST', 'Remote Bot Restarted!'); }
+    function deleteRemoteBot(botKey, name) {
+        Swal.fire({
+            title: 'Delete ' + name + '?',
+            text: 'This will permanently delete the bot from the secondary Replit.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Delete',
+            background: '#13132b',
+            color: '#f1f5f9'
+        }).then((r) => { if (r.isConfirmed) remoteApiCall('/api/remote/bots/' + encodeURIComponent(botKey), 'DELETE', 'Remote Bot Deleted!'); });
+    }
+
+    function renderRemoteBots(bots) {
+        const grid = document.getElementById('remoteBotGrid');
+        if (!grid) return;
+        
+        if (!bots || bots.length === 0) {
+            grid.innerHTML = '<div class="card" style="padding: 20px; text-align: center; color: var(--text-muted);"><i class="fa fa-cloud"></i> No remote bots deployed yet</div>';
+            return;
+        }
+        
+        grid.innerHTML = bots.map(bot => `
+            <div class="bot-card" data-name="${(bot.name || bot.botKey || '').toLowerCase()}" data-status="${bot.running ? 'running' : 'stopped'}" data-location="remote">
+                <div class="bot-header">
+                    <div>
+                        <div class="bot-name">${bot.name || bot.botKey}</div>
+                        <div class="bot-type">${bot.type || 'Custom'} <span class="badge" style="background: rgba(99, 102, 241, 0.2); color: var(--primary-light); font-size: 0.65rem;">Secondary</span></div>
+                    </div>
+                    <span class="badge ${bot.running ? 'badge-success' : 'badge-danger'}">
+                        <i class="fa fa-circle" style="font-size: 0.5rem; margin-right: 4px;"></i>
+                        ${bot.running ? 'Running' : 'Stopped'}
+                    </span>
+                </div>
+                <div class="bot-info">
+                    ${bot.pid && bot.running ? `<div class="bot-info-row"><span class="bot-info-label">Process ID</span><span class="bot-info-value">${bot.pid}</span></div>` : ''}
+                    ${bot.uptime && bot.running ? `<div class="bot-info-row"><span class="bot-info-label">Uptime</span><span class="bot-info-value">${Math.floor(bot.uptime / 3600000)}h ${Math.floor((bot.uptime % 3600000) / 60000)}m</span></div>` : ''}
+                    <div class="bot-info-row"><span class="bot-info-label">Location</span><span class="bot-info-value">Secondary Replit</span></div>
+                </div>
+                <div class="bot-actions">
+                    ${!bot.running ? `<button onclick="startRemoteBot('${bot.botKey || bot.name}')" class="btn btn-success btn-sm"><i class="fa fa-play"></i> Start</button>` : 
+                                     `<button onclick="stopRemoteBot('${bot.botKey || bot.name}')" class="btn btn-danger btn-sm"><i class="fa fa-stop"></i> Stop</button>`}
+                    <button onclick="restartRemoteBot('${bot.botKey || bot.name}')" class="btn btn-warning btn-sm"><i class="fa fa-redo"></i> Restart</button>
+                    <button onclick="deleteRemoteBot('${bot.botKey || bot.name}', '${bot.name || bot.botKey}')" class="btn btn-sm" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2);"><i class="fa fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function loadRemoteBots() {
+        if (!remoteConfigured) return;
+        
+        fetch('/api/remote/health', { credentials: 'include' })
+        .then(res => res.json())
+        .then(result => {
+            const statusEl = document.getElementById('remoteStatus');
+            if (result.healthy) {
+                statusEl.className = 'badge badge-success';
+                statusEl.textContent = 'Online';
+            } else {
+                statusEl.className = 'badge badge-danger';
+                statusEl.textContent = 'Offline';
+            }
+        }).catch(() => {
+            const statusEl = document.getElementById('remoteStatus');
+            if (statusEl) {
+                statusEl.className = 'badge badge-danger';
+                statusEl.textContent = 'Error';
+            }
+        });
+        
+        fetch('/api/remote/bots', { credentials: 'include' })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                renderRemoteBots(result.bots);
+            } else {
+                const grid = document.getElementById('remoteBotGrid');
+                if (grid) grid.innerHTML = '<div class="card" style="padding: 20px; text-align: center; color: var(--danger);"><i class="fa fa-exclamation-triangle"></i> ' + (result.error || 'Failed to load remote bots') + '</div>';
+            }
+        })
+        .catch(err => {
+            const grid = document.getElementById('remoteBotGrid');
+            if (grid) grid.innerHTML = '<div class="card" style="padding: 20px; text-align: center; color: var(--danger);"><i class="fa fa-exclamation-triangle"></i> Connection failed</div>';
+        });
+    }
+
+    if (remoteConfigured) {
+        loadRemoteBots();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "secondary-replit-bot-server",
+  "version": "1.0.0",
+  "description": "Secondary Replit server for hosting Discord bots remotely",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "discord.js": "^13.17.1"
+  }
+}

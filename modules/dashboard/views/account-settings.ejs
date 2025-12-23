@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - Bot Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://pro.fontawesome.com/releases/v6.0.0-beta1/css/all.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --danger: #ef4444;
+            --accent: #10b981;
+            --bg-dark: #0c0c1d;
+            --bg-card: #13132b;
+            --bg-input: #0a0a1a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: rgba(99, 102, 241, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a3e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 { font-size: 2rem; font-weight: 700; }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: var(--border-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(99, 102, 241, 0.25);
+            border-color: var(--primary);
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group { margin-bottom: 16px; }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .form-control:disabled {
+            background: var(--bg-input);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .form-hint { color: var(--text-muted); font-size: 0.75rem; margin-top: 4px; }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .info-row:last-child { border-bottom: none; }
+
+        .info-label { color: var(--text-secondary); font-weight: 500; }
+        .info-value { color: var(--text-primary); font-weight: 600; }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 40px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #86efac;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .header { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa fa-cog" style="margin-right: 12px;"></i>Account Settings</h1>
+            <a href="/" class="back-btn"><i class="fa fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+
+        <div class="grid">
+            <!-- Account Info -->
+            <div class="card">
+                <div class="card-title"><i class="fa fa-user"></i> Account Information</div>
+                
+                <div class="info-row">
+                    <span class="info-label">Email</span>
+                    <span class="info-value"><%= userInfo.email %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Username</span>
+                    <span class="info-value"><%= userInfo.username %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Auth Method</span>
+                    <span class="info-value">
+                        <% if (userInfo.authMethod === 'discord') { %>
+                            <i class="fab fa-discord"></i> Discord
+                        <% } else { %>
+                            <i class="fa fa-envelope"></i> Email
+                        <% } %>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Member Since</span>
+                    <span class="info-value"><%= new Date(userInfo.createdAt).toLocaleDateString() %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Last Login</span>
+                    <span class="info-value"><%= new Date(userInfo.lastLogin).toLocaleDateString() %></span>
+                </div>
+            </div>
+
+            <!-- Change Username -->
+            <div class="card">
+                <div class="card-title"><i class="fa fa-edit"></i> Change Username</div>
+                
+                <% if (messages?.usernameError) { %>
+                    <div class="error-message"><%= messages.usernameError %></div>
+                <% } %>
+                <% if (messages?.usernameSuccess) { %>
+                    <div class="success-message"><%= messages.usernameSuccess %></div>
+                <% } %>
+                
+                <form method="POST" action="/account-settings/update-username">
+                    <div class="form-group">
+                        <label class="form-label">New Username</label>
+                        <input type="text" name="username" class="form-control" 
+                               placeholder="<%= userInfo.username %>" 
+                               minlength="2" maxlength="30" required>
+                        <div class="form-hint">2-30 characters</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Username</button>
+                </form>
+            </div>
+
+            <!-- Change Password -->
+            <% if (userInfo.hasPassword) { %>
+            <div class="card">
+                <div class="card-title"><i class="fa fa-lock"></i> Change Password</div>
+                
+                <% if (messages?.passwordError) { %>
+                    <div class="error-message"><%= messages.passwordError %></div>
+                <% } %>
+                <% if (messages?.passwordSuccess) { %>
+                    <div class="success-message"><%= messages.passwordSuccess %></div>
+                <% } %>
+                
+                <form method="POST" action="/account-settings/change-password">
+                    <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="currentPassword" class="form-control" 
+                               placeholder="••••••••" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="newPassword" class="form-control" 
+                               placeholder="••••••••" required>
+                        <div class="form-hint">6+ chars, uppercase, lowercase, numbers</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" name="confirmPassword" class="form-control" 
+                               placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </form>
+            </div>
+            <% } %>
+
+            <!-- Discord Account -->
+            <div class="card">
+                <div class="card-title"><i class="fab fa-discord"></i> Discord Account</div>
+                
+                <% if (userInfo.discordId) { %>
+                    <div class="info-row">
+                        <span class="info-label">Discord ID</span>
+                        <span class="info-value"><%= userInfo.discordId %></span>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 12px;">
+                        Your Discord account is linked to this profile.
+                    </p>
+                <% } else %>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem;">
+                        No Discord account linked. You can link your Discord account to enable features like bot management.
+                    </p>
+                    <a href="/auth/discord" class="btn btn-primary" style="display: block; text-align: center; margin-top: 12px; text-decoration: none;">
+                        Link Discord Account
+                    </a>
+                <% } %>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="card" style="grid-column: 1/-1;">
+                <div class="card-title" style="color: var(--danger);">
+                    <i class="fa fa-exclamation-triangle"></i> Danger Zone
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 16px;">
+                    Logout from all sessions or delete your account. These actions cannot be undone.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    <form method="GET" action="/logout" style="margin: 0;">
+                        <button type="submit" class="btn btn-danger">Logout from All Devices</button>
+                    </form>
+                    <form method="POST" action="/account-settings/delete-account" style="margin: 0;" 
+                          onsubmit="return confirm('Are you sure? This cannot be undone. All your data will be permanently deleted.');">
+                        <button type="submit" class="btn btn-danger">Delete My Account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

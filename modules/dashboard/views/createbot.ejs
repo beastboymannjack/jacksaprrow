@@ -1,0 +1,370 @@
+<%- include('header'); -%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/sweetalert.css">
+    <title>Bot Hosting | Create Bot</title>
+</head>
+
+<style>
+    .create-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .template-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .template-card {
+        background: var(--bg-card);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .template-card:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+    }
+    .template-card.selected {
+        border-color: var(--primary);
+        background: rgba(88, 101, 242, 0.1);
+    }
+    .template-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+    .template-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+    .template-desc {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+    .template-features {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-color);
+    }
+    .template-features li {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+    }
+    .form-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+    .form-section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .form-group {
+        margin-bottom: 16px;
+    }
+    .form-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--bg-input);
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+    .form-group input:focus, .form-group select:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    @media (max-width: 640px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+    .color-preview {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        border: 2px solid var(--border-color);
+    }
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    .status-online {
+        background: rgba(87, 242, 135, 0.1);
+        color: #57F287;
+    }
+    .status-offline {
+        background: rgba(237, 66, 69, 0.1);
+        color: #ED4245;
+    }
+    .submit-section {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 24px;
+    }
+    .advanced-toggle {
+        cursor: pointer;
+        color: var(--primary);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .advanced-section {
+        display: none;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px dashed var(--border-color);
+    }
+    .advanced-section.show {
+        display: block;
+    }
+</style>
+
+<div class="create-container">
+    <div style="margin-bottom: 24px;">
+        <h1 class="section-title"><i class="fa fa-plus-circle" style="margin-right: 10px;"></i>Create New Bot</h1>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Deploy a custom Discord bot to the hosting server</p>
+    </div>
+
+    <% if(typeof remoteStatus !== 'undefined') { %>
+    <div style="margin-bottom: 20px;">
+        <span class="status-indicator <%= remoteStatus.healthy ? 'status-online' : 'status-offline' %>">
+            <i class="fa fa-<%= remoteStatus.healthy ? 'check-circle' : 'times-circle' %>"></i>
+            Secondary Server: <%= remoteStatus.healthy ? 'Online' : 'Offline' %>
+        </span>
+    </div>
+    <% } %>
+
+    <form id="createBotForm" action="/createbot" method="POST">
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fa fa-cube"></i> Select Bot Template
+            </div>
+            <div class="template-grid">
+                <% if(typeof templates !== 'undefined') { %>
+                    <% templates.forEach(function(t, index) { %>
+                    <div class="template-card <%= index === 0 ? 'selected' : '' %>" data-template="<%= t.id %>" onclick="selectTemplate('<%= t.id %>')">
+                        <div class="template-icon"><%= t.emoji %></div>
+                        <div class="template-name"><%= t.name %></div>
+                        <div class="template-desc"><%= t.description %></div>
+                        <ul class="template-features">
+                            <% t.features.slice(0, 4).forEach(function(f) { %>
+                            <li><%= f %></li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                    <% }); %>
+                <% } %>
+            </div>
+            <input type="hidden" name="bottype" id="bottype" value="music">
+        </div>
+
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fa fa-key"></i> Bot Credentials (Required)
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Bot Name</label>
+                    <input type="text" name="filename" id="filename" placeholder="my-awesome-bot" required pattern="[a-zA-Z0-9-_]+" title="Only letters, numbers, hyphens, and underscores">
+                </div>
+                <div class="form-group">
+                    <label>Bot Token</label>
+                    <input type="password" name="token" id="token" placeholder="Your Discord bot token" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Client ID (Application ID)</label>
+                    <input type="text" name="botid" id="botid" placeholder="123456789012345678" required>
+                </div>
+                <div class="form-group">
+                    <label>Owner Discord ID</label>
+                    <input type="text" name="owner" id="owner" placeholder="<%= user ? user.id : '' %>" value="<%= user ? user.id : '' %>" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fa fa-palette"></i> Customization
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Command Prefix</label>
+                    <input type="text" name="prefix" id="prefix" placeholder="," value="," maxlength="5">
+                </div>
+                <div class="form-group">
+                    <label>Embed Color</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" name="color" id="color" value="#5865F2" class="color-preview">
+                        <input type="text" id="colorText" value="#5865F2" placeholder="#5865F2" style="flex: 1;" onchange="document.getElementById('color').value = this.value">
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Bot Status Text</label>
+                    <input type="text" name="status" id="status" placeholder=",help | Serving {servers} servers" value=",help">
+                </div>
+                <div class="form-group">
+                    <label>Status Type</label>
+                    <select name="statustype" id="statustype">
+                        <option value="PLAYING">Playing</option>
+                        <option value="WATCHING">Watching</option>
+                        <option value="LISTENING">Listening to</option>
+                        <option value="COMPETING">Competing in</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Footer Text</label>
+                <input type="text" name="footertext" id="footertext" placeholder="Powered by deadloom" value="Powered by deadloom">
+            </div>
+            <div class="form-group">
+                <label>Avatar URL (optional)</label>
+                <input type="url" name="avatar" id="avatar" placeholder="https://example.com/avatar.png">
+            </div>
+
+            <div class="advanced-toggle" onclick="toggleAdvanced()">
+                <i class="fa fa-chevron-down" id="advancedIcon"></i>
+                <span>Advanced Options</span>
+            </div>
+
+            <div class="advanced-section" id="advancedSection">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Hosting Duration</label>
+                        <select name="expirationTime" id="expirationTime">
+                            <option value="7d">7 Days</option>
+                            <option value="14d">14 Days</option>
+                            <option value="30d" selected>30 Days</option>
+                            <option value="90d">90 Days</option>
+                            <option value="365d">1 Year</option>
+                            <option value="permanent">Permanent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Guild ID (optional)</label>
+                        <input type="text" name="guildId" id="guildId" placeholder="For guild-specific commands">
+                    </div>
+                </div>
+                <div class="form-group" id="lavalinkSection" style="display: none;">
+                    <label>Lavalink Host (Music Bot Only)</label>
+                    <input type="text" name="lavalinkHost" id="lavalinkHost" placeholder="uk-01.rrhosting.eu" value="uk-01.rrhosting.eu">
+                </div>
+                <div class="form-group" id="lavalinkPortSection" style="display: none;">
+                    <label>Lavalink Port</label>
+                    <input type="text" name="lavalinkPort" id="lavalinkPort" placeholder="1337" value="1337">
+                </div>
+                <div class="form-group" id="lavalinkPasswordSection" style="display: none;">
+                    <label>Lavalink Password</label>
+                    <input type="password" name="lavalinkPassword" id="lavalinkPassword" placeholder="RRHosting" value="RRHosting">
+                </div>
+                <div class="form-row" id="ticketBotSection" style="display: none;">
+                    <div class="form-group">
+                        <label>Category ID (Ticket Bot Only)</label>
+                        <input type="text" name="categoryId" id="categoryId" placeholder="Channel category ID for tickets">
+                    </div>
+                    <div class="form-group">
+                        <label>Log Channel ID (Ticket Bot Only)</label>
+                        <input type="text" name="logChannelId" id="logChannelId" placeholder="Channel ID for logging">
+                    </div>
+                </div>
+                <div class="form-group" id="supportRoleSection" style="display: none;">
+                    <label>Support Role ID (Ticket Bot Only)</label>
+                    <input type="text" name="supportRoleId" id="supportRoleId" placeholder="Role ID for support team">
+                </div>
+            </div>
+        </div>
+
+        <div class="submit-section">
+            <a href="/managebots" class="btn btn-outline">Cancel</a>
+            <button type="submit" class="btn btn-primary" id="createBtn">
+                <i class="fa fa-rocket"></i> Deploy Bot
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function selectTemplate(templateId) {
+        document.querySelectorAll('.template-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        document.querySelector(`[data-template="${templateId}"]`).classList.add('selected');
+        document.getElementById('bottype').value = templateId;
+
+        const lavalinkFields = ['lavalinkSection', 'lavalinkPortSection', 'lavalinkPasswordSection'];
+        if (templateId === 'music') {
+            lavalinkFields.forEach(id => document.getElementById(id).style.display = 'block');
+        } else {
+            lavalinkFields.forEach(id => document.getElementById(id).style.display = 'none');
+        }
+
+        const ticketFields = ['ticketBotSection', 'supportRoleSection'];
+        if (templateId === 'ticket') {
+            ticketFields.forEach(id => document.getElementById(id).style.display = 'block');
+        } else {
+            ticketFields.forEach(id => document.getElementById(id).style.display = 'none');
+        }
+    }
+
+    function toggleAdvanced() {
+        const section = document.getElementById('advancedSection');
+        const icon = document.getElementById('advancedIcon');
+        section.classList.toggle('show');
+        icon.className = section.classList.contains('show') ? 'fa fa-chevron-up' : 'fa fa-chevron-down';
+    }
+
+    document.getElementById('color').addEventListener('change', function() {
+        document.getElementById('colorText').value = this.value;
+    });
+
+    document.getElementById('createBotForm').addEventListener('submit', function(e) {
+        const btn = document.getElementById('createBtn');
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Deploying...';
+        btn.disabled = true;
+    });
+
+    selectTemplate('music');
+</script>
+</html>

@@ -1,0 +1,82 @@
+{
+  "inviteRequirementError": {
+    "color": "#ED4245",
+    "title": "❌ Invite Requirement Not Met",
+    "descriptionKey": "inviteRequirementError",
+    "fields": [
+      {"name": "Required Invites", "value": "{required}", "inline": true},
+      {"name": "Your Invites", "value": "{invites}", "inline": true},
+      {"name": "Info", "value": "You need to invite more people to the server to create a bot.", "inline": false}
+    ],
+    "footer": {"text": "Invite System • Contact staff if you have questions"}
+  },
+
+  "botCreationOverview": {
+    "color": "#5865F2",
+    "title": "🤖 Bot Creation Dashboard",
+    "description": "Welcome to the Bot Creation System! Select a template below to create your custom Discord bot.",
+    "fields": [
+      {"name": "📊 System Status", "value": "Hosting Server: {secondaryStatus}\nAvailable Templates: {templateCount}", "inline": true},
+      {"name": "⚡ Quick Info", "value": "Click a template to view details\nThen configure your bot settings", "inline": true}
+    ]
+  },
+
+  "botCreationSuccess": {
+    "color": "#57F287",
+    "title": "✅ Bot Created Successfully!",
+    "description": "Your bot has been created and deployed.",
+    "fields": [
+      {"name": "Bot Name", "value": "{botName}", "inline": true},
+      {"name": "Bot ID", "value": "{botId}", "inline": true},
+      {"name": "Template", "value": "{templateName}", "inline": true},
+      {"name": "Status", "value": "🟢 Running", "inline": true}
+    ]
+  },
+
+  "botControlStart": {
+    "color": "#57F287",
+    "title": "✅ Bot Started",
+    "description": "**{botName}** is now running",
+    "fields": [
+      {"name": "Status", "value": "🟢 Online", "inline": true},
+      {"name": "Time", "value": "{timestamp}", "inline": true}
+    ]
+  },
+
+  "botControlStop": {
+    "color": "#FFA500",
+    "title": "⏹️ Bot Stopped",
+    "description": "**{botName}** has been stopped",
+    "fields": [
+      {"name": "Status", "value": "🔴 Offline", "inline": true},
+      {"name": "Time", "value": "{timestamp}", "inline": true}
+    ]
+  },
+
+  "botControlRestart": {
+    "color": "#5865F2",
+    "title": "🔄 Bot Restarting",
+    "description": "**{botName}** is restarting...",
+    "fields": [
+      {"name": "Status", "value": "🟡 Restarting", "inline": true},
+      {"name": "Time", "value": "{timestamp}", "inline": true}
+    ]
+  },
+
+  "botDeleted": {
+    "color": "#ED4245",
+    "title": "🗑️ Bot Deleted",
+    "description": "**{botName}** has been permanently deleted",
+    "fields": [
+      {"name": "Status", "value": "❌ Deleted", "inline": true},
+      {"name": "Time", "value": "{timestamp}", "inline": true}
+    ]
+  },
+
+  "success": {
+    "color": "#57F287",
+    "title": "✅ Success",
+    "description": "{message}",
+    "footer": {"text": "Operation completed successfully"}
+  }
+}

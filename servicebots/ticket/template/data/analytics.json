@@ -1,0 +1,91 @@
+{
+  "1428716509965844551": [
+    {
+      "event": "ticket_created",
+      "data": {
+        "type": "general",
+        "priority": "urgent",
+        "userId": "930211130654195763"
+      },
+      "timestamp": 1761248415441
+    },
+    {
+      "event": "sla_breach",
+      "data": {
+        "ticketId": "1431004309855797270",
+        "slaMinutes": 1
+      },
+      "timestamp": 1761248475451
+    },
+    {
+      "event": "ticket_claimed",
+      "data": {
+        "ticketId": "1431004309855797270",
+        "staffId": "930211130654195763"
+      },
+      "timestamp": 1761248528529
+    },
+    {
+      "event": "ticket_closed",
+      "data": {
+        "ticketId": "1431004309855797270",
+        "duration": 216118
+      },
+      "timestamp": 1761248631215
+    },
+    {
+      "event": "ticket_created",
+      "data": {
+        "type": "report",
+        "priority": "urgent",
+        "userId": "930211130654195763"
+      },
+      "timestamp": 1761248712308
+    },
+    {
+      "event": "ticket_closed",
+      "data": {
+        "ticketId": "1431005556109349015",
+        "duration": 79872
+      },
+      "timestamp": 1761248791992
+    }
+  ],
+  "1425993141600915548": [
+    {
+      "event": "ticket_created",
+      "data": {
+        "type": "support",
+        "priority": "urgent",
+        "userId": "930211130654195763"
+      },
+      "timestamp": 1761525467855
+    },
+    {
+      "event": "ticket_created",
+      "data": {
+        "type": "support",
+        "priority": "high",
+        "userId": "1225039083374383104"
+      },
+      "timestamp": 1761525803629
+    },
+    {
+      "event": "ticket_created",
+      "data": {
+        "type": "support",
+        "priority": "urgent",
+        "userId": "930211130654195763"
+      },
+      "timestamp": 1761526124424
+    },
+    {
+      "event": "ticket_closed",
+      "data": {
+        "ticketId": "1432166351501393981",
+        "duration": 716182
+      },
+      "timestamp": 1761526185457
+    }
+  ]
+}

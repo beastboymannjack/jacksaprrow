@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Management Dashboard</title>
+    <link rel="stylesheet" href="/bootstrap.min.css">
+    <link rel="stylesheet" href="/animate.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #e0e0e0;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Section */
+        .dashboard-header {
+            background: #1e1e2e;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border: 1px solid #333;
+        }
+
+        .dashboard-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 0;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Filters & Controls */
+        .dashboard-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px 15px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #2a2a3e;
+            color: #e0e0e0;
+        }
+
+        .filter-group button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .filter-group button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Bot Cards Grid */
+        .bots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .bot-card {
+            background: #1e1e2e;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #333;
+        }
+
+        .bot-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Bot Card Header */
+        .bot-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .bot-card-title {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .bot-card-type {
+            font-size: 12px;
+            opacity: 0.85;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-error {
+            background: #f5c6cb;
+            color: #721c24;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-online .status-dot {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        .status-offline .status-dot {
+            background: #dc3545;
+        }
+
+        .status-error .status-dot {
+            background: #ffc107;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Bot Card Body */
+        .bot-card-body {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .bot-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .bot-info-row:last-of-type {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #888;
+            font-size: 13px;
+        }
+
+        .info-value {
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+
+        /* Metrics Section */
+        .bot-metrics {
+            background: #2a2a3e;
+            padding: 12px;
+            border-radius: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        /* Bot Card Footer - Action Buttons */
+        .bot-card-footer {
+            padding: 15px 20px;
+            background: #2a2a3e;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            flex: 1;
+            min-width: 80px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-start {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: #218838;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-stop {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-stop:hover {
+            background: #c82333;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-restart {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-restart:hover {
+            background: #e0a800;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+        }
+
+        .btn-delete {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #5a6268;
+            box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-logs {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-logs:hover {
+            background: #138496;
+            box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .empty-state-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .empty-state-button {
+            padding: 12px 30px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .empty-state-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Analytics Modal */
+        .analytics-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            animation: fadeIn 0.3s;
+        }
+
+        .analytics-modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .analytics-modal-content {
+            background: #1e1e2e;
+            border-radius: 12px;
+            max-width: 1000px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            border: 1px solid #333;
+        }
+
+        .analytics-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+
+        .analytics-modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 0;
+        }
+
+        .close-modal {
+            font-size: 28px;
+            font-weight: bold;
+            color: #888;
+            cursor: pointer;
+            border: none;
+            background: none;
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover {
+            color: #e0e0e0;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .analytics-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .analytics-card-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .analytics-card-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            opacity: 0.9;
+            letter-spacing: 1px;
+        }
+
+        .chart-container {
+            margin-bottom: 30px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            background: #2a2a3e;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Loading State */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Alert Messages */
+        .alert-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        .alert-success {
+            background: #28a745;
+        }
+
+        .alert-error {
+            background: #dc3545;
+        }
+
+        .alert-info {
+            background: #17a2b8;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Tab Navigation */
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            color: #888;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.hidden {
+            display: none;
+        }
+
+        /* Create Bot Form Styles */
+        :root {
+            --primary: #667eea;
+            --bg-card: #1e1e2e;
+            --bg-input: #2a2a3e;
+            --border-color: #333333;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --text-muted: #888888;
+        }
+
+        .create-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .template-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .template-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .template-card.selected {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .template-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .template-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .template-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .template-features {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            list-style: none;
+        }
+
+        .template-features li {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .form-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        .form-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background: rgba(87, 242, 135, 0.1);
+            color: #57F287;
+        }
+
+        .status-offline {
+            background: rgba(237, 66, 69, 0.1);
+            color: #ED4245;
+        }
+
+        .submit-section {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-create {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-create:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-create:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .advanced-toggle {
+            cursor: pointer;
+            color: var(--primary);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .advanced-section {
+            display: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .advanced-section.show {
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .bots-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bot-card-footer {
+                flex-direction: column;
+            }
+
+            .btn-action {
+                width: 100%;
+            }
+
+            .tab-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div style="flex: 1;">
+                <h1>🤖 Bot Management Dashboard</h1>
+                <p id="lastRefreshTime" style="font-size: 12px; color: #888; margin-top: 5px;">Last update: never</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalBots">0</span>
+                    <span class="stat-label">Total Bots</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="onlineBots">0</span>
+                    <span class="stat-label">Online</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="offlineBots">0</span>
+                    <span class="stat-label">Offline</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('manage')">📊 Manage</button>
+            <button class="tab-btn" onclick="switchTab('create')">➕ Create Bot</button>
+            <button class="tab-btn" onclick="switchTab('codeshare')">💻 Code Share</button>
+            <button class="tab-btn" onclick="switchTab('analytics')">📈 Analytics</button>
+        </div>
+
+        <!-- Manage Tab -->
+        <div id="manage-tab" class="tab-content">
+            <!-- Controls & Filters -->
+            <div class="dashboard-controls">
+            <div class="filter-group">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search bots..."
+                >
+                <select id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                </select>
+                <button onclick="refreshDashboard()">🔄 Refresh</button>
+            </div>
+        </div>
+
+            <!-- Bots Grid -->
+            <div id="botsContainer" class="bots-grid">
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: white;">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 15px;">Loading your bots...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Bot Tab -->
+        <div id="create-tab" class="tab-content hidden">
+            <div class="create-container">
+                <div style="margin-bottom: 24px;">
+                    <h2 style="font-size: 24px; font-weight: 700; color: #e0e0e0; margin: 0 0 8px 0;"><i class="fa fa-plus-circle" style="margin-right: 10px;"></i>Create New Bot</h2>
+                    <p style="color: #b0b0b0; font-size: 0.9rem;">Deploy a custom Discord bot to the hosting server</p>
+                </div>
+
+                <form id="createBotForm" action="/createbot" method="POST">
+                    <!-- Template Selection -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="fa fa-cube"></i> Select Bot Template
+                        </div>
+                        <div class="template-grid" id="templateGrid">
+                            <!-- Templates will be loaded dynamically -->
+                            <p style="color: #999;">Loading templates...</p>
+                        </div>
+                        <input type="hidden" name="bottype" id="bottype" value="music">
+                    </div>
+
+                    <!-- Bot Credentials -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="fa fa-key"></i> Bot Credentials (Required)
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Bot Name</label>
+                                <input type="text" name="filename" id="filename" placeholder="my-awesome-bot" required pattern="[a-zA-Z0-9-_]+" title="Only letters, numbers, hyphens, and underscores">
+                            </div>
+                            <div class="form-group">
+                                <label>Bot Token</label>
+                                <input type="password" name="token" id="token" placeholder="Your Discord bot token" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Client ID (Application ID)</label>
+                                <input type="text" name="botid" id="botid" placeholder="123456789012345678" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Owner Discord ID</label>
+                                <input type="text" name="owner" id="owner" placeholder="" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customization -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="fa fa-palette"></i> Customization
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Command Prefix</label>
+                                <input type="text" name="prefix" id="prefix" placeholder="," value="," maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label>Embed Color</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="color" name="color" id="color" value="#5865F2" class="color-preview">
+                                    <input type="text" id="colorText" value="#5865F2" placeholder="#5865F2" style="flex: 1;" onchange="document.getElementById('color').value = this.value">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Bot Status Text</label>
+                                <input type="text" name="status" id="status" placeholder=",help | Serving {servers} servers" value=",help">
+                            </div>
+                            <div class="form-group">
+                                <label>Status Type</label>
+                                <select name="statustype" id="statustype">
+                                    <option value="PLAYING">Playing</option>
+                                    <option value="WATCHING">Watching</option>
+                                    <option value="LISTENING">Listening to</option>
+                                    <option value="COMPETING">Competing in</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Footer Text</label>
+                            <input type="text" name="footertext" id="footertext" placeholder="Powered by Bot Hosting" value="Powered by Bot Hosting">
+                        </div>
+                        <div class="form-group">
+                            <label>Avatar URL (optional)</label>
+                            <input type="url" name="avatar" id="avatar" placeholder="https://example.com/avatar.png">
+                        </div>
+
+                        <div class="advanced-toggle" onclick="toggleAdvanced()">
+                            <i class="fa fa-chevron-down" id="advancedIcon"></i>
+                            <span>Advanced Options</span>
+                        </div>
+
+                        <div class="advanced-section" id="advancedSection">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Hosting Duration</label>
+                                    <select name="expirationTime" id="expirationTime">
+                                        <option value="7d">7 Days</option>
+                                        <option value="14d">14 Days</option>
+                                        <option value="30d" selected>30 Days</option>
+                                        <option value="90d">90 Days</option>
+                                        <option value="365d">1 Year</option>
+                                        <option value="permanent">Permanent</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Guild ID (optional)</label>
+                                    <input type="text" name="guildId" id="guildId" placeholder="For guild-specific commands">
+                                </div>
+                            </div>
+                            <div class="form-group" id="lavalinkSection" style="display: none;">
+                                <label>Lavalink Host (Music Bot Only)</label>
+                                <input type="text" name="lavalinkHost" id="lavalinkHost" placeholder="uk-01.rrhosting.eu" value="uk-01.rrhosting.eu">
+                            </div>
+                            <div class="form-group" id="lavalinkPortSection" style="display: none;">
+                                <label>Lavalink Port</label>
+                                <input type="text" name="lavalinkPort" id="lavalinkPort" placeholder="1337" value="1337">
+                            </div>
+                            <div class="form-group" id="lavalinkPasswordSection" style="display: none;">
+                                <label>Lavalink Password</label>
+                                <input type="password" name="lavalinkPassword" id="lavalinkPassword" placeholder="RRHosting" value="RRHosting">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="submit-section">
+                        <button type="submit" class="btn-create" id="createBtn">
+                            <i class="fa fa-rocket"></i> Deploy Bot
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Code Share Tab -->
+        <div id="codeshare-tab" class="tab-content hidden">
+            <div style="padding: 20px;">
+                <div style="margin-bottom: 24px;">
+                    <h2 style="font-size: 24px; font-weight: 700; color: #e0e0e0; margin: 0 0 8px 0;"><i class="fa fa-code" style="margin-right: 10px;"></i>Code Share Library</h2>
+                    <p style="color: #b0b0b0; font-size: 0.9rem;">Create and manage shared code snippets directly</p>
+                </div>
+
+                <!-- Create Code Form -->
+                <div class="form-section" style="margin-bottom: 30px;">
+                    <div class="form-section-title">
+                        <i class="fa fa-plus-circle"></i> Create New Code Share
+                    </div>
+                    <form id="createCodeShareForm" method="POST" enctype="multipart/form-data" style="display: grid; gap: 16px;">
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
+                                <label>Code Name *</label>
+                                <input type="text" name="name" placeholder="e.g., Music Bot Handler" required maxlength="100" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-input); color: var(--text-primary); font-size: 0.9rem;">
+                            </div>
+                            <div class="form-group">
+                                <label>Language</label>
+                                <select name="language" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-input); color: var(--text-primary); font-size: 0.9rem;">
+                                    <option value="javascript">JavaScript</option>
+                                    <option value="python">Python</option>
+                                    <option value="typescript">TypeScript</option>
+                                    <option value="java">Java</option>
+                                    <option value="go">Go</option>
+                                    <option value="rust">Rust</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select name="category" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-input); color: var(--text-primary); font-size: 0.9rem;">
+                                    <option value="music">Music Bots</option>
+                                    <option value="moderation">Moderation</option>
+                                    <option value="utility">Utility</option>
+                                    <option value="games">Games</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea name="description" rows="2" placeholder="Brief description of what this code does..." maxlength="500" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-input); color: var(--text-primary); font-size: 0.9rem; font-family: inherit;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>YouTube Video Link (optional)</label>
+                            <input type="url" name="videoLink" placeholder="https://youtube.com/watch?v=..." style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-input); color: var(--text-primary); font-size: 0.9rem;">
+                        </div>
+                        <div class="form-group">
+                            <label>Code Content</label>
+                            <textarea name="codeContent" rows="8" placeholder="Paste your code here..." style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-input); color: var(--text-primary); font-size: 0.9rem; font-family: 'Courier New', monospace;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Or Upload Files</label>
+                            <input type="file" name="files" multiple style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-input); color: var(--text-primary); font-size: 0.9rem;">
+                            <small style="color: var(--text-muted); display: block; margin-top: 4px;">Supports .js, .py, .zip, .txt files</small>
+                        </div>
+                        <div style="display: flex; gap: 12px; margin-top: 20px;">
+                            <button type="submit" class="btn-create" style="flex: 1;">
+                                <i class="fa fa-cloud-upload"></i> Create Code Share
+                            </button>
+                            <button type="reset" class="btn-action btn-logs" style="flex: 1;">
+                                <i class="fa fa-redo"></i> Clear Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Code Shares List -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fa fa-list"></i> Your Code Shares
+                    </div>
+                    <div id="codeShareContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #b0b0b0;">
+                            <p><i class="fa fa-code" style="font-size: 32px; opacity: 0.5;"></i></p>
+                            <p style="margin-top: 10px;">No code shares created yet. Create your first one above!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content hidden">
+            <div style="text-align: center; padding: 40px; color: white;">
+                <p style="font-size: 18px; margin-bottom: 20px;">Dashboard Analytics</p>
+                <p style="opacity: 0.8;">Global analytics will be displayed here...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Modal -->
+    <div id="analyticsModal" class="analytics-modal">
+        <div class="analytics-modal-content">
+            <div class="analytics-modal-header">
+                <h2 class="analytics-modal-title" id="analyticsTitle">Bot Analytics</h2>
+                <button class="close-modal" onclick="closeAnalyticsModal()">&times;</button>
+            </div>
+            <div id="analyticsBody">
+                <div style="text-align: center; padding: 40px;">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 15px;">Loading analytics...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let allBots = [];
+        let filteredBots = [];
+        let analyticsCharts = {};
+        let isLoading = false;
+        let lastUpdateTime = null;
+        let pollInterval = null;
+
+        // Tab switching function
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.remove('hidden');
+            }
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+
+            // Load templates when switching to create tab
+            if (tabName === 'create') {
+                loadTemplates();
+            }
+        }
+
+        // Load templates for bot creation
+        async function loadTemplates() {
+            const grid = document.getElementById('templateGrid');
+            if (!grid || grid.dataset.loaded) return;
+
+            try {
+                const response = await fetch('/api/templates');
+                if (!response.ok) {
+                    throw new Error('Failed to load templates');
+                }
+                const data = await response.json();
+                const templates = data.templates || [];
+
+                if (templates.length === 0) {
+                    grid.innerHTML = '<p style="color: #999;">No templates available</p>';
+                    return;
+                }
+
+                grid.innerHTML = templates.map((t, index) => `
+                    <div class="template-card ${index === 0 ? 'selected' : ''}" data-template="${t.id}" onclick="selectTemplate('${t.id}')">
+                        <div class="template-icon">${t.emoji || '🤖'}</div>
+                        <div class="template-name">${t.name}</div>
+                        <div class="template-desc">${t.description}</div>
+                        <ul class="template-features">
+                            ${(t.features || []).slice(0, 4).map(f => `<li>${f}</li>`).join('')}
+                        </ul>
+                    </div>
+                `).join('');
+
+                grid.dataset.loaded = 'true';
+                selectTemplate(templates[0].id);
+            } catch (error) {
+                console.error('Error loading templates:', error);
+                grid.innerHTML = '<p style="color: red;">Error loading templates</p>';
+            }
+        }
+
+        // Select bot template
+        function selectTemplate(templateId) {
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            const selected = document.querySelector(`[data-template="${templateId}"]`);
+            if (selected) {
+                selected.classList.add('selected');
+            }
+            document.getElementById('bottype').value = templateId;
+
+            const lavalinkFields = ['lavalinkSection', 'lavalinkPortSection', 'lavalinkPasswordSection'];
+            if (templateId === 'music') {
+                lavalinkFields.forEach(id => document.getElementById(id).style.display = 'block');
+            } else {
+                lavalinkFields.forEach(id => document.getElementById(id).style.display = 'none');
+            }
+        }
+
+        // Toggle advanced options
+        function toggleAdvanced() {
+            const section = document.getElementById('advancedSection');
+            const icon = document.getElementById('advancedIcon');
+            section.classList.toggle('show');
+            icon.className = section.classList.contains('show') ? 'fa fa-chevron-up' : 'fa fa-chevron-down';
+        }
+
+        // Handle form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('createBotForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const btn = document.getElementById('createBtn');
+                    if (btn) {
+                        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Deploying...';
+                        btn.disabled = true;
+                    }
+                });
+
+                // Color picker sync
+                const colorInput = document.getElementById('color');
+                const colorText = document.getElementById('colorText');
+                if (colorInput) {
+                    colorInput.addEventListener('change', function() {
+                        colorText.value = this.value;
+                    });
+                }
+            }
+        }, false);
+
+        // Handle CodeShare form submission
+        function handleCodeShareForm() {
+            const form = document.getElementById('createCodeShareForm');
+            if (!form) return;
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                
+                try {
+                    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Creating...';
+                    submitBtn.disabled = true;
+
+                    const response = await fetch('/dashboard/codeshare/create', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        showAlert('Code Share created successfully!', 'success');
+                        form.reset();
+                        // Reload codeshare list
+                        loadCodeShares();
+                    } else {
+                        const error = await response.json();
+                        showAlert('Failed to create code share: ' + (error.message || 'Unknown error'), 'error');
+                    }
+                } catch (error) {
+                    console.error('CodeShare creation error:', error);
+                    showAlert('Error creating code share: ' + error.message, 'error');
+                } finally {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+
+        // Load user's code shares
+        async function loadCodeShares() {
+            try {
+                const response = await fetch('/api/codeshare/list');
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                const container = document.getElementById('codeShareContainer');
+                const codes = data.codes || [];
+
+                if (codes.length === 0) {
+                    container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #b0b0b0;"><p><i class="fa fa-code" style="font-size: 32px; opacity: 0.5;"></i></p><p style="margin-top: 10px;">No code shares created yet. Create your first one above!</p></div>';
+                    return;
+                }
+
+                container.innerHTML = codes.map(code => `
+                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                            <div>
+                                <h4 style="margin: 0; color: var(--text-primary); font-weight: 600;">${code.name}</h4>
+                                <small style="color: var(--text-muted);">${code.id}</small>
+                            </div>
+                            <span style="background: #667eea; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">${code.language}</span>
+                        </div>
+                        <p style="margin: 0 0 12px 0; color: var(--text-secondary); font-size: 0.9rem;">${code.description || 'No description'}</p>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <a href="/dashboard/codeshare/${code.id}" class="btn-action btn-logs" style="flex: 1; text-align: center; text-decoration: none;"><i class="fa fa-eye"></i> View</a>
+                            <button class="btn-action btn-delete" onclick="deleteCodeShare('${code.id}')" style="flex: 1;"><i class="fa fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading code shares:', error);
+            }
+        }
+
+        // Delete code share
+        async function deleteCodeShare(codeId) {
+            if (!confirm('Are you sure you want to delete this code share?')) return;
+
+            try {
+                const response = await fetch(`/dashboard/codeshare/${codeId}/delete`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    showAlert('Code share deleted!', 'success');
+                    loadCodeShares();
+                } else {
+                    showAlert('Failed to delete code share', 'error');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                showAlert('Error deleting code share', 'error');
+            }
+        }
+
+        // Initialize dashboard on load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBots();
+            handleCodeShareForm();
+            loadCodeShares();
+            
+            // Add event listeners
+            document.getElementById('searchInput').addEventListener('keyup', filterBots);
+            document.getElementById('statusFilter').addEventListener('change', filterBots);
+
+            // Start auto-refresh every 3 seconds
+            startPolling(3000);
+            
+            // Update last refresh time periodically
+            setInterval(updateLastRefreshTime, 1000);
+        });
+
+        // Start polling with configurable interval
+        function startPolling(interval = 3000) {
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(loadBots, interval);
+        }
+
+        // Load bots from API with polling indicator
+        async function loadBots() {
+            if (isLoading) return; // Prevent duplicate requests
+            
+            isLoading = true;
+            try {
+                const response = await fetch('/api/bots/status/all');
+                if (!response.ok) throw new Error('Failed to load bots');
+                
+                const data = await response.json();
+                const newBots = data.bots || [];
+                
+                // Only update if data changed
+                if (JSON.stringify(allBots) !== JSON.stringify(newBots)) {
+                    allBots = newBots;
+                    filterBots();
+                    updateStats();
+                    updateConnectionStatus(true);
+                }
+                
+                lastUpdateTime = new Date();
+            } catch (error) {
+                console.error('Error loading bots:', error);
+                updateConnectionStatus(false);
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        // Update connection status indicator
+        function updateConnectionStatus(isConnected) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (!statusEl) {
+                const indicator = document.createElement('div');
+                indicator.id = 'connectionStatus';
+                indicator.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 8px 16px;
+                    background: white;
+                    border-radius: 20px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    font-size: 12px;
+                    font-weight: 600;
+                    z-index: 999;
+                `;
+                document.body.appendChild(indicator);
+            }
+            
+            const status = document.getElementById('connectionStatus');
+            if (isConnected) {
+                status.innerHTML = '<span style="width: 8px; height: 8px; border-radius: 50%; background: #28a745; animation: pulse 2s infinite;"></span>Connected';
+                status.style.color = '#28a745';
+            } else {
+                status.innerHTML = '<span style="width: 8px; height: 8px; border-radius: 50%; background: #dc3545;"></span>Offline';
+                status.style.color = '#dc3545';
+            }
+        }
+
+        // Update last refresh time display
+        function updateLastRefreshTime() {
+            if (!lastUpdateTime) return;
+            const now = new Date();
+            const diff = Math.floor((now - lastUpdateTime) / 1000);
+            const refreshLabel = document.getElementById('lastRefreshTime');
+            if (refreshLabel) {
+                refreshLabel.textContent = `Last update: ${diff < 60 ? diff + 's ago' : Math.floor(diff / 60) + 'm ago'}`;
+            }
+        }
+
+        // Filter bots based on search and status
+        function filterBots() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            filteredBots = allBots.filter(bot => {
+                const matchesSearch = bot.name.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || bot.status.toLowerCase() === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            renderBots();
+        }
+
+        // Render bot cards
+        function renderBots() {
+            const container = document.getElementById('botsContainer');
+
+            if (filteredBots.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1;">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <div class="empty-state-title">No Bots Found</div>
+                            <div class="empty-state-text">
+                                ${allBots.length === 0 
+                                    ? 'You haven\'t created any bots yet. Start by creating your first bot!' 
+                                    : 'No bots match your search filters.'}
+                            </div>
+                            ${allBots.length === 0 ? `
+                                <a href="/createbot" class="empty-state-button">Create Your First Bot</a>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredBots.map(bot => createBotCard(bot)).join('');
+        }
+
+        // Create individual bot card HTML
+        function createBotCard(bot) {
+            const statusClass = bot.status.toLowerCase().replace(' ', '-');
+            const statusText = bot.status || 'Unknown';
+            const uptime = formatUptime(bot.uptime);
+            const errorCount = bot.errors ? bot.errors.length : 0;
+
+            return `
+                <div class="bot-card">
+                    <div class="bot-card-header">
+                        <div>
+                            <h3 class="bot-card-title">${escapeHtml(bot.name)}</h3>
+                            <span class="bot-card-type">${escapeHtml(bot.template || 'Custom')}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bot-card-body">
+                        <div class="status-badge status-${statusClass}">
+                            <span class="status-dot"></span>
+                            ${statusText}
+                        </div>
+
+                        <div class="bot-info-row">
+                            <span class="info-label">Owner ID:</span>
+                            <span class="info-value">${bot.ownerId || 'N/A'}</span>
+                        </div>
+
+                        <div class="bot-info-row">
+                            <span class="info-label">Created:</span>
+                            <span class="info-value">${formatDate(bot.createdAt)}</span>
+                        </div>
+
+                        <div class="bot-info-row">
+                            <span class="info-label">Last Updated:</span>
+                            <span class="info-value">${formatDate(bot.lastUpdated)}</span>
+                        </div>
+
+                        <div class="bot-metrics">
+                            <div class="metric">
+                                <div class="metric-value">${uptime}</div>
+                                <div class="metric-label">Uptime</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">${errorCount}</div>
+                                <div class="metric-label">Errors</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bot-card-footer">
+                        <button class="btn-action btn-start" onclick="controlBot('${escapeHtml(bot.name)}', 'start')">
+                            ▶ Start
+                        </button>
+                        <button class="btn-action btn-stop" onclick="controlBot('${escapeHtml(bot.name)}', 'stop')">
+                            ⏹ Stop
+                        </button>
+                        <button class="btn-action btn-restart" onclick="controlBot('${escapeHtml(bot.name)}', 'restart')">
+                            🔄 Restart
+                        </button>
+                        <button class="btn-action btn-logs" onclick="viewLogs('${escapeHtml(bot.name)}')">
+                            📋 Logs
+                        </button>
+                        <button class="btn-action btn-restart" onclick="viewAnalytics('${escapeHtml(bot.name)}')">
+                            📊 Analytics
+                        </button>
+                        <button class="btn-action btn-delete" onclick="deleteBot('${escapeHtml(bot.name)}')">
+                            🗑 Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Bot control function
+        async function controlBot(botName, action) {
+            if (!confirm(`Are you sure you want to ${action} ${botName}?`)) return;
+
+            try {
+                const response = await fetch(`/api/bots/control/${encodeURIComponent(botName)}/${action}`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) throw new Error('Control action failed');
+                
+                showAlert(`${botName} ${action} command sent!`, 'success');
+                setTimeout(loadBots, 1000); // Reload after short delay
+            } catch (error) {
+                console.error(`Error ${action}ing bot:`, error);
+                showAlert(`Failed to ${action} bot`, 'error');
+            }
+        }
+
+        // Delete bot function
+        async function deleteBot(botName) {
+            if (!confirm(`WARNING: Are you sure you want to DELETE ${botName}? This cannot be undone!`)) return;
+            if (!confirm(`Final confirmation: Delete ${botName} permanently?`)) return;
+
+            try {
+                const response = await fetch(`/api/bots/${encodeURIComponent(botName)}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Delete failed');
+                
+                showAlert(`${botName} deleted successfully!`, 'success');
+                loadBots();
+            } catch (error) {
+                console.error('Error deleting bot:', error);
+                showAlert('Failed to delete bot', 'error');
+            }
+        }
+
+        // View logs function
+        function viewLogs(botName) {
+            window.location.href = `/logs?bot=${encodeURIComponent(botName)}`;
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = allBots.length;
+            const online = allBots.filter(b => b.status?.toLowerCase() === 'online').length;
+            const offline = total - online;
+
+            document.getElementById('totalBots').textContent = total;
+            document.getElementById('onlineBots').textContent = online;
+            document.getElementById('offlineBots').textContent = offline;
+        }
+
+        // Refresh dashboard
+        function refreshDashboard() {
+            loadBots();
+            showAlert('Dashboard refreshed!', 'info');
+        }
+
+        // Utility Functions
+        function formatDate(dateString) {
+            if (!dateString) return 'Never';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatUptime(uptimeSeconds) {
+            if (!uptimeSeconds || uptimeSeconds <= 0) return '0m';
+            
+            const days = Math.floor(uptimeSeconds / 86400);
+            const hours = Math.floor((uptimeSeconds % 86400) / 3600);
+            const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+
+            if (days > 0) return `${days}d`;
+            if (hours > 0) return `${hours}h`;
+            return `${minutes}m`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showAlert(message, type = 'info') {
+            const alert = document.createElement('div');
+            alert.className = `alert-message alert-${type}`;
+            alert.textContent = message;
+            document.body.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 4000);
+        }
+
+        // Analytics Functions
+        async function viewAnalytics(botName) {
+            const modal = document.getElementById('analyticsModal');
+            const body = document.getElementById('analyticsBody');
+            
+            modal.classList.add('active');
+            document.getElementById('analyticsTitle').textContent = `📊 Analytics: ${botName}`;
+
+            try {
+                const response = await fetch(`/api/analytics/${encodeURIComponent(botName)}`);
+                if (!response.ok) throw new Error('Failed to load analytics');
+                
+                const data = await response.json();
+                const { analytics, stats, recentEvents } = data;
+
+                if (!analytics) {
+                    body.innerHTML = '<p style="text-align: center; padding: 40px;">No analytics data available yet.</p>';
+                    return;
+                }
+
+                // Build analytics HTML
+                const totalEvents = analytics.events ? analytics.events.length : 0;
+                const healthPercent = stats?.healthPercentage || 100;
+
+                body.innerHTML = `
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="analytics-card-value">${stats?.totalStarts || 0}</div>
+                            <div class="analytics-card-label">Total Starts</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-card-value">${stats?.totalCrashes || 0}</div>
+                            <div class="analytics-card-label">Crashes</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-card-value">${stats?.totalCommands || 0}</div>
+                            <div class="analytics-card-label">Commands Executed</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-card-value">${stats?.totalErrors || 0}</div>
+                            <div class="analytics-card-label">Total Errors</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-card-value">${healthPercent}%</div>
+                            <div class="analytics-card-label">Health</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-card-value">${totalEvents}</div>
+                            <div class="analytics-card-label">Events Logged</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-title">📈 Event Distribution</div>
+                        <div class="chart-wrapper">
+                            <canvas id="eventChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-title">🚀 Recent Events (Last 10)</div>
+                        <div style="background: #f8f9fa; border-radius: 8px; padding: 15px;">
+                            ${(recentEvents || []).slice(-10).reverse().map(evt => `
+                                <div style="padding: 8px; border-bottom: 1px solid #e0e0e0; font-size: 13px;">
+                                    <strong>${evt.type}</strong> - ${new Date(evt.timestamp).toLocaleString()}
+                                </div>
+                            `).join('') || '<p style="color: #999;">No recent events</p>'}
+                        </div>
+                    </div>
+                `;
+
+                // Draw chart
+                setTimeout(() => {
+                    const ctx = document.getElementById('eventChart');
+                    if (ctx) {
+                        const eventCounts = {
+                            starts: stats?.totalStarts || 0,
+                            stops: stats?.totalStops || 0,
+                            crashes: stats?.totalCrashes || 0,
+                            commands: stats?.totalCommands || 0,
+                            errors: stats?.totalErrors || 0
+                        };
+
+                        new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['Starts', 'Stops', 'Crashes', 'Commands', 'Errors'],
+                                datasets: [{
+                                    data: Object.values(eventCounts),
+                                    backgroundColor: ['#667eea', '#764ba2', '#dc3545', '#28a745', '#ffc107'],
+                                    borderColor: 'white',
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'right'
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }, 100);
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                body.innerHTML = `<p style="text-align: center; color: red; padding: 40px;">Error loading analytics: ${error.message}</p>`;
+            }
+        }
+
+        function closeAnalyticsModal() {
+            document.getElementById('analyticsModal').classList.remove('active');
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('analyticsModal');
+            if (event.target == modal) {
+                modal.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>

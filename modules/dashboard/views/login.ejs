@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Bot Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://pro.fontawesome.com/releases/v6.0.0-beta1/css/all.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --bg-dark: #0c0c1d;
+            --bg-card: #13132b;
+            --bg-card-hover: #1a1a3e;
+            --bg-input: #0a0a1a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: rgba(99, 102, 241, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a3e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            animation: slideInUp 0.5s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 auto 16px;
+        }
+
+        .login-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+            background: var(--bg-input);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .forgot-password {
+            color: var(--primary-light);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .forgot-password:hover {
+            color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-discord {
+            background: #5865F2;
+            color: white;
+            border: 1px solid #5865F2;
+        }
+
+        .btn-discord:hover {
+            background: #4754D9;
+            box-shadow: 0 8px 16px rgba(88, 101, 242, 0.3);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-message i {
+            font-size: 1rem;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #86efac;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .login-footer {
+            text-align: center;
+        }
+
+        .login-footer p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .login-footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-footer a:hover {
+            color: var(--primary);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                max-width: 100%;
+            }
+
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .login-card {
+                padding: 24px;
+            }
+
+            .form-control {
+                font-size: 16px;
+            }
+
+            body {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .login-card {
+                padding: 16px;
+            }
+
+            .login-header {
+                margin-bottom: 24px;
+            }
+
+            .login-logo {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .login-header h1 {
+                font-size: 1.25rem;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo">
+                <i class="fa fa-robot"></i>
+            </div>
+            <h1>Bot Dashboard</h1>
+            <p>Sign in to manage your bots</p>
+        </div>
+
+        <div class="login-card">
+            <% if (error) { %>
+                <div class="error-message">
+                    <i class="fa fa-exclamation-circle"></i>
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <% if (success) { %>
+                <div class="success-message">
+                    <i class="fa fa-check-circle"></i>
+                    <%= success %>
+                </div>
+            <% } %>
+
+            <form method="POST" action="/login" style="margin-bottom: 16px;">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="your@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-footer">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="remember" name="remember" value="on">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <a href="/forgot-password" class="forgot-password">Forgot?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-sign-in-alt"></i> Sign In
+                </button>
+            </form>
+
+            <div class="divider">or</div>
+
+            <form method="GET" action="/auth/discord">
+                <button type="submit" class="btn btn-discord">
+                    <i class="fab fa-discord"></i> Continue with Discord
+                </button>
+            </form>
+        </div>
+
+        <div class="login-footer">
+            <p>Dashboard access is staff-only.</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Contact your administrator for credentials.</p>
+        </div>
+    </div>
+</body>
+</html>

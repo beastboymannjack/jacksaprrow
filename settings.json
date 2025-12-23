@@ -1,0 +1,44 @@
+{
+    "_README": "Configure each role with your Discord server's role IDs. Use unique IDs for each role to ensure proper permissions.",
+    "Roles": {
+        "FounderId": "1449104321512738877",
+        "OwnerRoleId": "1449104321512738877",
+        "CoOwnerRoleId": "1449104321512738877",
+        "ChiefHumanResources": "1449104321512738877",
+        "HumanResources": "1449104321512738877",
+        "AdminRoleId": "1449104321512738877",
+        "ModRoleId": "1449104321512738877",
+        "ChiefSupporterRoleId": "1449104321512738877",
+        "ChiefBotCreatorRoleId": "1449104321512738877",
+        "BotCreatorRoleId": "1449104321512738877",
+        "SupporterRoleId": "1449104321512738877",
+        "NewSupporterRoleId": "1449104321512738877"
+    },
+    "ticketsystem": [
+        {
+            "value": "General Help",
+            "description": "Get help for anything you need",
+            "emoji": "❓",
+            "type": "GENERAL"
+        },
+        {
+            "value": "Bot Help",
+            "description": "Get help for your hosted bot",
+            "emoji": "🤖",
+            "type": "HELP"
+        },
+        {
+            "value": "Staff Application",
+            "description": "Apply as a Staff member",
+            "emoji": "👥",
+            "type": "TEAMAPPLY"
+        },
+        {
+            "value": "Partner Application",
+            "description": "Apply for a partnership",
+            "emoji": "🤝",
+            "type": "PARTNERAPPLY"
+        }
+    ],
+    "ordersystem": []
+}

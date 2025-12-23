@@ -1,0 +1,91 @@
+const { EmbedBuilder } = require('discord.js');
+const { hasControlPermission, formatDuration } = require('../helpers/musicHelpers');
+const emojis = require('../emojis.json');
+
+module.exports = {
+    name: 'seek',
+    aliases: ['goto', 'jumpto'],
+    description: 'Seek to a specific time in the current song',
+
+    async execute(message, args) {
+        const { client, member, guild } = message;
+        
+        if (!member.voice.channel) {
+            const embed = new EmbedBuilder()
+                .setColor(0xff6b6b)
+                .setDescription(`${emojis.error} You need to be in a voice channel!`);
+            return message.reply({ embeds: [embed] });
+        }
+
+        const player = client.poru.players.get(guild.id);
+        
+        if (!player) {
+            const embed = new EmbedBuilder()
+                .setColor(0xff6b6b)
+                .setDescription(`${emojis.error} No music is currently playing!`);
+            return message.reply({ embeds: [embed] });
+        }
+
+        if (member.voice.channel.id !== player.voiceChannel) {
+            const embed = new EmbedBuilder()
+                .setColor(0xff6b6b)
+                .setDescription(`${emojis.error} You must be in the same voice channel as the bot!`);
+            return message.reply({ embeds: [embed] });
+        }
+
+        if (!hasControlPermission(message, player)) {
+            const embed = new EmbedBuilder()
+                .setColor(0xff6b6b)
+                .setDescription(`${emojis.error} Only the requester, admins, or server managers can control the music!`);
+            return message.reply({ embeds: [embed] });
+        }
+
+        if (!player.currentTrack) {
+            const embed = new EmbedBuilder()
+                .setColor(0xff6b6b)
+                .setDescription(`${emojis.error} There is no track playing!`);
+            return message.reply({ embeds: [embed] });
+        }
+
+        if (!args[0]) {
+            const embed = new EmbedBuilder()
+                .setColor(0xff6b6b)
+                .setDescription(`${emojis.error} Please provide time in seconds!`);
+            return message.reply({ embeds: [embed] });
+        }
+
+        const timeInSeconds = parseInt(args[0]);
+        
+        if (isNaN(timeInSeconds) || timeInSeconds < 0) {
+            const embed = new EmbedBuilder()
+                .setColor(0xff6b6b)
+                .setDescription(`${emojis.error} Invalid time! Please provide a positive number in seconds.`);
+            return message.reply({ embeds: [embed] });
+        }
+
+        const timeInMs = timeInSeconds * 1000;
+        const trackDuration = player.currentTrack.info.length;
+
+        if (timeInMs >= trackDuration) {
+            const embed = new EmbedBuilder()
+                .setColor(0xff6b6b)
+                .setDescription(`${emojis.error} Cannot seek beyond track duration! Track length: ${formatDuration(trackDuration)}`);
+            return message.reply({ embeds: [embed] });
+        }
+
+        player.seekTo(timeInMs);
+        
+        const embed = new EmbedBuilder()
+                .setColor(0x00d4aa)
+                .setDescription(`⏩ Seeked to **${formatDuration(timeInMs)}**.`);
+        
+        return message.reply({ embeds: [embed] });
+    },
+};
+
+/*
+: ! Aegis !
+    + Discord: deadloom Development
+    + Community: https://discord.gg/8wfT8SfB5Z  (deadloom Development )
+    + for any queries reach out Community or DM me.
+*/

@@ -1,0 +1,176 @@
+<%- include('header'); -%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/sweetalert.css">
+    <title>Bot Hosting | Activity Logs</title>
+</head>
+
+<style>
+    .log-filters {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .log-table-container {
+        overflow-x: auto;
+    }
+    .log-entry {
+        display: flex;
+        align-items: center;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.1s ease;
+    }
+    .log-entry:hover {
+        background: var(--bg-card-hover);
+    }
+    .log-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 14px;
+        font-size: 0.85rem;
+    }
+    .log-icon.start { background: rgba(16, 185, 129, 0.15); color: var(--accent); }
+    .log-icon.stop { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+    .log-icon.restart { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .log-icon.create { background: rgba(99, 102, 241, 0.15); color: var(--primary-light); }
+    .log-icon.delete { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+    .log-icon.error { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+    .log-icon.info { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+    .log-content {
+        flex: 1;
+        min-width: 0;
+    }
+    .log-message {
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+    }
+    .log-meta {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+    .log-time {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+    .no-logs {
+        text-align: center;
+        padding: 48px 24px;
+        color: var(--text-muted);
+    }
+</style>
+
+<div style="max-width: 1000px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h1 class="section-title" style="margin: 0;"><i class="fa fa-file-alt" style="margin-right: 10px;"></i>Activity Logs</h1>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px;">Recent deployment and bot activity</p>
+        </div>
+        <button onclick="location.reload()" class="btn btn-outline btn-sm">
+            <i class="fa fa-sync"></i> Refresh
+        </button>
+    </div>
+
+    <div class="log-filters">
+        <div class="search-input" style="flex: 1; min-width: 200px;">
+            <i class="fa fa-search"></i>
+            <input type="text" class="form-control" id="searchLogs" placeholder="Search logs..." style="padding-left: 40px;" oninput="filterLogs()">
+        </div>
+        <select class="form-control" id="actionFilter" style="width: auto;" onchange="filterLogs()">
+            <option value="all">All Actions</option>
+            <option value="create">Created</option>
+            <option value="start">Started</option>
+            <option value="stop">Stopped</option>
+            <option value="restart">Restarted</option>
+            <option value="delete">Deleted</option>
+            <option value="error">Errors</option>
+        </select>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <% if(typeof logs !== 'undefined' && logs.length > 0) { %>
+            <div id="logList">
+                <% logs.forEach(function(log) { %>
+                    <div class="log-entry" data-action="<%= log.action %>" data-text="<%= (log.botName + ' ' + log.message).toLowerCase() %>">
+                        <div class="log-icon <%= log.action %>">
+                            <% if(log.action === 'start') { %>
+                                <i class="fa fa-play"></i>
+                            <% } else if(log.action === 'stop') { %>
+                                <i class="fa fa-stop"></i>
+                            <% } else if(log.action === 'restart') { %>
+                                <i class="fa fa-redo"></i>
+                            <% } else if(log.action === 'create') { %>
+                                <i class="fa fa-plus"></i>
+                            <% } else if(log.action === 'delete') { %>
+                                <i class="fa fa-trash"></i>
+                            <% } else if(log.action === 'error') { %>
+                                <i class="fa fa-exclamation-circle"></i>
+                            <% } else { %>
+                                <i class="fa fa-info-circle"></i>
+                            <% } %>
+                        </div>
+                        <div class="log-content">
+                            <div class="log-message"><%= log.message %></div>
+                            <div class="log-meta">
+                                <% if(log.botName) { %>
+                                    <span style="color: var(--primary-light);"><%= log.botName %></span>
+                                    <span style="margin: 0 6px;">•</span>
+                                <% } %>
+                                <span class="badge badge-<%= log.status === 'success' ? 'success' : log.status === 'error' ? 'danger' : 'info' %>" style="padding: 2px 6px; font-size: 0.65rem;">
+                                    <%= log.status %>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="log-time">
+                            <%= new Date(log.timestamp).toLocaleString() %>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="no-logs">
+                <i class="fa fa-inbox" style="font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5;"></i>
+                <p>No activity logs available</p>
+                <p style="font-size: 0.85rem; margin-top: 8px;">Logs will appear here when you create, start, stop, or manage bots.</p>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+</main>
+
+<script>
+    function filterLogs() {
+        const search = document.getElementById('searchLogs').value.toLowerCase();
+        const action = document.getElementById('actionFilter').value;
+        const entries = document.querySelectorAll('.log-entry');
+        
+        entries.forEach(entry => {
+            const text = entry.dataset.text;
+            const entryAction = entry.dataset.action;
+            const matchesSearch = text.includes(search);
+            const matchesAction = action === 'all' || entryAction === action;
+            entry.style.display = (matchesSearch && matchesAction) ? '' : 'none';
+        });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const botFilter = urlParams.get('bot');
+    if (botFilter) {
+        document.getElementById('searchLogs').value = botFilter;
+        filterLogs();
+    }
+</script>
+</body>
+</html>

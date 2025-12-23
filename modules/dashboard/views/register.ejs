@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Bot Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://pro.fontawesome.com/releases/v6.0.0-beta1/css/all.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-dark: #0c0c1d;
+            --bg-card: #13132b;
+            --bg-card-hover: #1a1a3e;
+            --bg-input: #0a0a1a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: rgba(99, 102, 241, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a3e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 420px;
+            animation: slideInUp 0.5s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .register-logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 auto 16px;
+        }
+
+        .register-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .register-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .register-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+            background: var(--bg-input);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-hint {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+        }
+
+        .strength-bar {
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--danger);
+            transition: all 0.3s ease;
+        }
+
+        .strength-fill.weak {
+            width: 25%;
+            background: var(--danger);
+        }
+
+        .strength-fill.fair {
+            width: 50%;
+            background: var(--warning);
+        }
+
+        .strength-fill.good {
+            width: 75%;
+            background: var(--accent);
+        }
+
+        .strength-fill.strong {
+            width: 100%;
+            background: var(--accent);
+        }
+
+        .strength-text {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--primary);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-message i {
+            font-size: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .register-footer {
+            text-align: center;
+        }
+
+        .register-footer p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .register-footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .register-footer a:hover {
+            color: var(--primary);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+            .register-container {
+                max-width: 100%;
+            }
+
+            .register-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .register-card {
+                padding: 24px;
+            }
+
+            .form-control {
+                font-size: 16px;
+            }
+
+            body {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .register-card {
+                padding: 16px;
+            }
+
+            .register-header {
+                margin-bottom: 24px;
+            }
+
+            .register-logo {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .register-header h1 {
+                font-size: 1.25rem;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <div class="register-logo">
+                <i class="fa fa-robot"></i>
+            </div>
+            <h1>Create Account</h1>
+            <p>Join and start managing bots</p>
+        </div>
+
+        <div class="register-card">
+            <% if (error) { %>
+                <div class="error-message">
+                    <i class="fa fa-exclamation-circle"></i>
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <form method="POST" action="/register">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="your@email.com" required>
+                    <div class="form-hint">We'll use this to verify your account</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" placeholder="your_username" maxlength="20">
+                    <div class="form-hint">Optional - for display purposes</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required>
+                    <div class="form-hint">Minimum 6 characters with uppercase, lowercase, and numbers</div>
+                    <div class="password-strength">
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <div class="strength-text" id="strengthText">No password</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" name="confirmPassword" class="form-control" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to the <strong>Terms of Service</strong> and <strong>Privacy Policy</strong></label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-user-plus"></i> Create Account
+                </button>
+            </form>
+
+            <div class="divider">or</div>
+
+            <form method="GET" action="/auth/discord">
+                <button type="submit" class="btn btn-primary" style="background: #5865F2; margin-bottom: 0;">
+                    <i class="fab fa-discord"></i> Sign up with Discord
+                </button>
+            </form>
+        </div>
+
+        <div class="register-footer">
+            <p>Already have an account?</p>
+            <a href="/login">Sign in here →</a>
+        </div>
+    </div>
+
+    <script>
+        const passwordInput = document.getElementById('password');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthText = document.getElementById('strengthText');
+
+        passwordInput?.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            let text = 'No password';
+
+            if (password.length >= 6) strength++;
+            if (password.length >= 10) strength++;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[!@#$%^&*]/.test(password)) strength++;
+
+            strengthFill.className = 'strength-fill';
+            if (strength === 1) {
+                strengthFill.classList.add('weak');
+                text = 'Weak';
+            } else if (strength === 2) {
+                strengthFill.classList.add('fair');
+                text = 'Fair';
+            } else if (strength === 3 || strength === 4) {
+                strengthFill.classList.add('good');
+                text = 'Good';
+            } else if (strength >= 5) {
+                strengthFill.classList.add('strong');
+                text = 'Strong';
+            }
+
+            strengthText.textContent = text;
+        });
+
+        // Form validation
+        document.querySelector('form')?.addEventListener('submit', function(e) {
+            const password = document.querySelector('input[name="password"]').value;
+            const confirmPassword = document.querySelector('input[name="confirmPassword"]').value;
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return false;
+            }
+
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('Password must be at least 6 characters!');
+                return false;
+            }
+
+            const terms = document.getElementById('terms').checked;
+            if (!terms) {
+                e.preventDefault();
+                alert('You must agree to the Terms of Service!');
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>

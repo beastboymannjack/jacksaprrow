@@ -1,0 +1,71 @@
+modules = ["nodejs-20", "web"]
+[agent]
+expertMode = true
+integrations = ["javascript_openai:1.0.0", "javascript_gemini:1.0.0"]
+
+[nix]
+channel = "stable-25_05"
+packages = ["python3", "openssh", "sshpass", "util-linux"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Discord Bot"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Dashboard Server"
+
+[[workflows.workflow]]
+name = "Discord Bot"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node index.js"
+
+[[workflows.workflow]]
+name = "Dashboard Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[ports]]
+localPort = 3000
+externalPort = 3000
+
+[[ports]]
+localPort = 3001
+externalPort = 3001
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[deployment]
+deploymentTarget = "vm"
+run = ["node", "index.js"]
+
+[userenv]
+
+[userenv.shared]
+SERVER_ID = "1440723119764541534"
+BOT_OWNER_ID = "1078669976875049021"
+REMOTE_LOG_URL = "https://secondaryboat.dates-femboys.fun"
+HOSTING_API_KEY = "sk_live_abc123xyz789def456ghi789jkl012mno"

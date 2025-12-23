@@ -1,0 +1,242 @@
+<%- include('header') %>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">Code Share Management</h4>
+                <p class="text-muted">Share code snippets and files for your YouTube tutorials</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Codes</h5>
+                    <h2 class="mb-0"><%= analytics.totalCodes || 0 %></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Downloads</h5>
+                    <h2 class="mb-0"><%= analytics.totalDownloads || 0 %></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5 class="card-title">Total Stars</h5>
+                    <h2 class="mb-0"><%= analytics.totalStars || 0 %></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">This Month</h5>
+                    <h2 class="mb-0"><%= analytics.recentCodes?.length || 0 %></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create New Code -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Create New Code Share</h5>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#createCodeForm">
+                        <i class="bi bi-plus-lg"></i> New Code
+                    </button>
+                </div>
+                <div class="collapse" id="createCodeForm">
+                    <div class="card-body">
+                        <form action="/dashboard/codeshare/create" method="POST" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Code Name</label>
+                                        <input type="text" class="form-control" name="name" required placeholder="e.g., Music Bot Handler">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Language</label>
+                                        <select class="form-select" name="language">
+                                            <option value="javascript">JavaScript</option>
+                                            <option value="python">Python</option>
+                                            <option value="typescript">TypeScript</option>
+                                            <option value="java">Java</option>
+                                            <option value="go">Go</option>
+                                            <option value="rust">Rust</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">Category</label>
+                                        <select class="form-select" name="category">
+                                            <option value="music">Music Bots</option>
+                                            <option value="moderation">Moderation</option>
+                                            <option value="utility">Utility</option>
+                                            <option value="games">Games</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" name="description" rows="2" placeholder="Brief description of what this code does..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">YouTube Video Link (optional)</label>
+                                <input type="url" class="form-control" name="videoLink" placeholder="https://youtube.com/watch?v=...">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Code Content</label>
+                                <textarea class="form-control font-monospace" name="codeContent" rows="10" placeholder="Paste your code here..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Or Upload Files</label>
+                                <input type="file" class="form-control" name="files" multiple>
+                                <small class="text-muted">Supports .js, .py, .zip, .txt files</small>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-cloud-upload"></i> Create Code Share
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Code List -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Your Code Shares</h5>
+                </div>
+                <div class="card-body">
+                    <% if (codes && codes.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Language</th>
+                                        <th>Downloads</th>
+                                        <th>Stars</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% codes.forEach(code => { %>
+                                        <tr>
+                                            <td>
+                                                <strong><%= code.name %></strong>
+                                                <br><small class="text-muted"><%= code.id %></small>
+                                            </td>
+                                            <td><span class="badge bg-primary"><%= code.language %></span></td>
+                                            <td><%= code.downloads || 0 %></td>
+                                            <td><%= code.stars || 0 %> ⭐</td>
+                                            <td><%= new Date(code.createdAt).toLocaleDateString() %></td>
+                                            <td>
+                                                <a href="/dashboard/codeshare/<%= code.id %>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="/dashboard/codeshare/<%= code.id %>/edit" class="btn btn-sm btn-outline-warning">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteCode('<%= code.id %>')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center py-5">
+                            <i class="bi bi-code-slash display-1 text-muted"></i>
+                            <h5 class="mt-3">No Code Shares Yet</h5>
+                            <p class="text-muted">Create your first code share to get started!</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Codes -->
+    <% if (analytics.topCodes && analytics.topCodes.length > 0) { %>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🔥 Top Downloaded</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <% analytics.topCodes.forEach((code, i) => { %>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><%= i + 1 %>. <%= code.name %></span>
+                                <span class="badge bg-success"><%= code.downloads %> downloads</span>
+                            </li>
+                        <% }); %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">✨ Recent Codes</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <% analytics.recentCodes.forEach((code, i) => { %>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><%= code.name %></span>
+                                <span class="badge bg-info"><%= new Date(code.createdAt).toLocaleDateString() %></span>
+                            </li>
+                        <% }); %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <% } %>
+</div>
+
+<script>
+function deleteCode(codeId) {
+    if (confirm('Are you sure you want to delete this code? This cannot be undone.')) {
+        fetch('/dashboard/codeshare/' + codeId + '/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to delete code: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(err => alert('Error: ' + err.message));
+    }
+}
+</script>
